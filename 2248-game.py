@@ -3,7 +3,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 from telegram import KeyboardButton, ReplyKeyboardMarkup
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    web_app = WebAppInfo(url="https://github.com/Anbessaa/2248.git")
+    web_app = WebAppInfo(url="https://github.com/Anbessaa/telegram-2248-game.git")
     keyboard = [[KeyboardButton("Play 2248", web_app=web_app)]]
     reply_markup = ReplyKeyboardMarkup(keyboard)
     await update.message.reply_text("Press the button to play 2248!", reply_markup=reply_markup)
