@@ -1,7 +1,11 @@
 document.addEventListener('DOMContentLoaded', (event) => {
+    console.log("DOM fully loaded");
     if (window.Telegram && window.Telegram.WebApp) {
+      console.log("Telegram WebApp detected");
       window.Telegram.WebApp.ready();
       window.Telegram.WebApp.expand();
+    } else {
+      console.log("Telegram WebApp not detected");
     }
     initGame();
   });
@@ -9,10 +13,12 @@ let grid = Array(4).fill().map(() => Array(4).fill(0));
 const gameContainer = document.getElementById('game-container');
 
 function initGame() {
+    console.log("Initializing game");
     addNewTile();
     addNewTile();
     renderGrid();
-}
+    console.log("Initial grid:", grid);
+  }
 
 function addNewTile() {
     let emptyCells = [];
@@ -87,17 +93,35 @@ function moveAndMerge(line) {
 }
 
 document.addEventListener('keydown', (e) => {
-    e.preventDefault(); // Предотвращаем стандартное поведение клавиш
-    switch(e.key) {
-      case 'ArrowUp': move('up'); break;
-      case 'ArrowDown': move('down'); break;
-      case 'ArrowLeft': move('left'); break;
-      case 'ArrowRight': move('right'); break;
-    }
-  });
+  e.preventDefault(); // Предотвращаем стандартное поведение клавиш
+  switch(e.key) {
+    case 'ArrowUp': move('up'); break;
+    case 'ArrowDown': move('down'); break;
+    case 'ArrowLeft': move('left'); break;
+    case 'ArrowRight': move('right'); break;
+  }
+});
 
-initGame();
+let touchStartX = 0;
+let touchStartY = 0;
 
-// Интеграция с Telegram Mini App
-//window.Telegram.WebApp.ready();
-//window.Telegram.WebApp.expand();
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+});
+
+document.addEventListener('touchend', (e) => {
+  let touchEndX = e.changedTouches[0].clientX;
+  let touchEndY = e.changedTouches[0].clientY;
+  
+  let deltaX = touchEndX - touchStartX;
+  let deltaY = touchEndY - touchStartY;
+  
+  if (Math.abs(deltaX) > Math.abs(deltaY)) {
+    if (deltaX > 0) move('right');
+    else move('left');
+  } else {
+    if (deltaY > 0) move('down');
+    else move('up');
+  }
+});
