@@ -1,3 +1,4 @@
+let score = 0;
 document.addEventListener('DOMContentLoaded', (event) => {
     console.log("DOM fully loaded");
     if (window.Telegram && window.Telegram.WebApp) {
@@ -13,12 +14,12 @@ let grid = Array(4).fill().map(() => Array(4).fill(0));
 const gameContainer = document.getElementById('game-container');
 
 function initGame() {
-    console.log("Initializing game");
+    score = 0;
+    grid = Array(4).fill().map(() => Array(4).fill(0));
     addNewTile();
     addNewTile();
     renderGrid();
-    console.log("Initial grid:", grid);
-  }
+}
 
 function addNewTile() {
     let emptyCells = [];
@@ -38,13 +39,17 @@ function addNewTile() {
 function renderGrid() {
     gameContainer.innerHTML = '';
     for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-            const cell = document.createElement('div');
-            cell.className = 'cell';
-            cell.textContent = grid[i][j] || '';
-            gameContainer.appendChild(cell);
+      for (let j = 0; j < 4; j++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        if (grid[i][j] !== 0) {
+          cell.textContent = grid[i][j];
+          cell.classList.add(`cell-${grid[i][j]}`);
         }
+        gameContainer.appendChild(cell);
+      }
     }
+    document.getElementById('score').textContent = `Score: ${score}`;
 }
 
 function move(direction) {
@@ -75,7 +80,10 @@ function move(direction) {
     if (moved) {
         addNewTile();
         renderGrid();
-    }
+        if (isGameOver()) {
+          alert("Game Over! Your score: " + score);
+        }
+      }
 }
 
 function moveAndMerge(line) {
@@ -83,6 +91,7 @@ function moveAndMerge(line) {
     for (let i = 0; i < line.length - 1; i++) {
         if (line[i] === line[i + 1]) {
             line[i] *= 2;
+            score += line[i]; // Увеличиваем счет
             line.splice(i + 1, 1);
         }
     }
@@ -91,6 +100,17 @@ function moveAndMerge(line) {
     }
     return line;
 }
+
+function isGameOver() {
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        if (grid[i][j] === 0) return false;
+        if (i < 3 && grid[i][j] === grid[i + 1][j]) return false;
+        if (j < 3 && grid[i][j] === grid[i][j + 1]) return false;
+      }
+    }
+    return true;
+  }
 
 document.addEventListener('keydown', (e) => {
   e.preventDefault(); // Предотвращаем стандартное поведение клавиш
@@ -111,17 +131,18 @@ document.addEventListener('touchstart', (e) => {
 });
 
 document.addEventListener('touchend', (e) => {
-  let touchEndX = e.changedTouches[0].clientX;
-  let touchEndY = e.changedTouches[0].clientY;
-  
-  let deltaX = touchEndX - touchStartX;
-  let deltaY = touchEndY - touchStartY;
-  
-  if (Math.abs(deltaX) > Math.abs(deltaY)) {
-    if (deltaX > 0) move('right');
-    else move('left');
-  } else {
-    if (deltaY > 0) move('down');
-    else move('up');
-  }
-});
+    e.preventDefault(); // Предотвращаем стандартное поведение
+    let touchEndX = e.changedTouches[0].clientX;
+    let touchEndY = e.changedTouches[0].clientY;
+    
+    let deltaX = touchEndX - touchStartX;
+    let deltaY = touchEndY - touchStartY;
+    
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
+      if (deltaX > 0) move('right');
+      else move('left');
+    } else if (Math.abs(deltaY) > 30) {
+      if (deltaY > 0) move('down');
+      else move('up');
+    }
+  });
